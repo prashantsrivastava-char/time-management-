@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduTime - Institutional Academic & Time Management Portal</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Custom scrollbars and transitions */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.5); }
+    .badge-present { background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-absent { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-800/90 backdrop-blur-md border-b border-slate-700/80 sticky top-0 z-40 px-4 lg:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-lg text-white tracking-tight">EduTime Management</h1>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Academic Portal</span>
+          </div>
+          <p class="text-xs text-slate-400">Class Scheduling, Faculty Hours & Student Attendance</p>
+        </div>
+      </div>
+
+      <!-- Quick Role Switcher Banner -->
+      <div class="flex items-center flex-wrap gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 px-2 font-medium">Switch View:</span>
+        <button onclick="setRole('ADMIN')" id="btn-role-admin" class="px-3 py-1 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Admin (Dean)
+        </button>
+        <button onclick="setRole('FACULTY')" id="btn-role-faculty" class="px-3 py-1 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-slate-800">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>
+          Prof. Smith (Faculty)
+        </button>
+        <button onclick="setRole('STUDENT')" id="btn-role-student" class="px-3 py-1 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-slate-800">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Emma Watson (Student)
+        </button>
+      </div>
+
+      <!-- Current Profile Chip -->
+      <div class="flex items-center gap-3">
+        <div class="text-right hidden sm:block">
+          <div id="profile-name" class="text-xs font-semibold text-slate-200">Dr. Robert Vance</div>
+          <div id="profile-role" class="text-[11px] text-indigo-400 font-mono">ROLE: ADMIN</div>
+        </div>
+        <div id="profile-avatar" class="w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center font-bold text-xs text-indigo-300">
+          RV
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div id="notification-bar" class="hidden max-w-7xl mx-auto w-full px-4 lg:px-8 mt-3">
+    <div id="notification-content" class="p-3 rounded-lg text-xs font-medium flex items-center justify-between"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-6">
+
+    <!-- KPI Summary Row -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-all">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+          <span>Active Courses</span>
+          <span class="p-1 rounded bg-indigo-500/10 text-indigo-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </span>
+        </div>
+        <div id="kpi-courses-count" class="text-2xl font-bold text-white mt-2">4</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Across CS & Engineering</div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-all">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+          <span>Weekly Class Hours</span>
+          <span class="p-1 rounded bg-emerald-500/10 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </span>
+        </div>
+        <div id="kpi-hours-count" class="text-2xl font-bold text-white mt-2">9.5 hrs</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Logged faculty teaching & labs</div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-all">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+          <span>Average Attendance</span>
+          <span class="p-1 rounded bg-amber-500/10 text-amber-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </span>
+        </div>
+        <div id="kpi-attendance-avg" class="text-2xl font-bold text-white mt-2">71.4%</div>
+        <div class="text-[11px] text-amber-400/90 mt-0.5">Threshold: 75% required</div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-all">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+          <span>Upcoming Activities</span>
+          <span class="p-1 rounded bg-purple-500/10 text-purple-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </span>
+        </div>
+        <div id="kpi-activities-count" class="text-2xl font-bold text-white mt-2">2</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Symposium & Examinations</div>
+      </div>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 1: ADMIN DASHBOARD -->
+    <!-- ============================================================= -->
+    <div id="view-admin" class="space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>Institutional Operations & Time Control</span>
+            <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">Master Admin</span>
+          </h2>
+          <p class="text-xs text-slate-400">Configure timetable slots, audit faculty workload hours, and schedule academic events.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="openModal('modal-add-schedule')" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm flex items-center gap-1.5 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Add Class Schedule
+          </button>
+          <button onclick="openModal('modal-add-activity')" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 flex items-center gap-1.5 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Schedule Academic Activity
+          </button>
+        </div>
+      </div>
+
+      <!-- Master Class Timetable -->
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+        <div class="p-4 border-b border-slate-700 flex flex-wrap items-center justify-between gap-3 bg-slate-800/90">
+          <div>
+            <h3 class="font-semibold text-sm text-white">Master Institutional Timetable</h3>
+            <p class="text-xs text-slate-400">All registered class schedules with assigned faculty and room allocations</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="filter-timetable-day" onchange="renderTimetable()" class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+              <option value="ALL">All Days</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </select>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="p-3.5">Course</th>
+                <th class="p-3.5">Faculty In-Charge</th>
+                <th class="p-3.5">Day</th>
+                <th class="p-3.5">Time Interval</th>
+                <th class="p-3.5">Room / Lab</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="table-admin-schedules" class="divide-y divide-slate-700/60 text-slate-300">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Faculty Working Hours Summary Report -->
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+        <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/90">
+          <div>
+            <h3 class="font-semibold text-sm text-white">Faculty Working Hours & Academic Load Report</h3>
+            <p class="text-xs text-slate-400">Real-time log of faculty lectures, laboratory supervision, and curriculum tasks</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="p-3.5">Faculty Member</th>
+                <th class="p-3.5">Date</th>
+                <th class="p-3.5">Hours</th>
+                <th class="p-3.5">Activity Description</th>
+                <th class="p-3.5">Workload Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-admin-faculty-hours" class="divide-y divide-slate-700/60 text-slate-300">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Master Student Attendance Overview -->
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+        <div class="p-4 border-b border-slate-700 bg-slate-800/90">
+          <h3 class="font-semibold text-sm text-white">Institutional Attendance Registry</h3>
+          <p class="text-xs text-slate-400">Session logs and presence status across academic batches</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="p-3.5">Student Username</th>
+                <th class="p-3.5">Course Code</th>
+                <th class="p-3.5">Session Date</th>
+                <th class="p-3.5">Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-admin-attendance" class="divide-y divide-slate-700/60 text-slate-300">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 2: FACULTY DASHBOARD -->
+    <!-- ============================================================= -->
+    <div id="view-faculty" class="space-y-6 hidden">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>Faculty Academic Workbench</span>
+            <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">Prof. Alice Smith</span>
+          </h2>
+          <p class="text-xs text-slate-400">View teaching slots, log your academic working hours, and record student attendance.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="openModal('modal-log-hours')" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm flex items-center gap-1.5 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Log Working Hours
+          </button>
+          <button onclick="openModal('modal-mark-attendance')" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm flex items-center gap-1.5 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            Mark Student Attendance
+          </button>
+        </div>
+      </div>
+
+      <!-- Two-column: Teaching schedule & Hours summary -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Assigned Teaching Schedule (2 cols) -->
+        <div class="lg:col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+          <div class="p-4 border-b border-slate-700 bg-slate-800/90">
+            <h3 class="font-semibold text-sm text-white">My Weekly Teaching Classes</h3>
+            <p class="text-xs text-slate-400">Classrooms and scheduled intervals assigned to you</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+                <tr>
+                  <th class="p-3.5">Course</th>
+                  <th class="p-3.5">Title</th>
+                  <th class="p-3.5">Day</th>
+                  <th class="p-3.5">Timing</th>
+                  <th class="p-3.5">Room</th>
+                </tr>
+              </thead>
+              <tbody id="table-faculty-schedule" class="divide-y divide-slate-700/60 text-slate-300">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Working Hours Gauge Card (1 col) -->
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 shadow-md flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-sm text-white">Hours Logged This Week</h3>
+              <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">Target: 20 hrs</span>
+            </div>
+            <div class="mt-4 flex items-baseline gap-2">
+              <span id="faculty-total-hours" class="text-3xl font-extrabold text-white">5.5</span>
+              <span class="text-xs text-slate-400 font-medium">/ 20.0 hrs completed</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2.5 mt-3 overflow-hidden">
+              <div id="faculty-hours-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style="width: 27.5%"></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">Maintains compliance with the institution's minimum academic workload criteria.</p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-700 space-y-2">
+            <div class="text-xs font-semibold text-slate-300">Recent Tasks Logged:</div>
+            <div id="faculty-recent-tasks" class="space-y-1.5 text-xs text-slate-400">
+              <!-- Dynamically inserted -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Attendance for Faculty Courses -->
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+        <div class="p-4 border-b border-slate-700 bg-slate-800/90 flex justify-between items-center">
+          <div>
+            <h3 class="font-semibold text-sm text-white">Attendance Records for My Courses</h3>
+            <p class="text-xs text-slate-400">Submitted attendance logs for CS101, CS103</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="p-3.5">Student</th>
+                <th class="p-3.5">Course Code</th>
+                <th class="p-3.5">Date</th>
+                <th class="p-3.5">Attendance Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-faculty-attendances" class="divide-y divide-slate-700/60 text-slate-300">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- VIEW 3: STUDENT DASHBOARD -->
+    <!-- ============================================================= -->
+    <div id="view-student" class="space-y-6 hidden">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-800/40 p-4 rounded-xl border border-slate-700/60">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>Student Academic Schedule & Attendance</span>
+            <span class="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded border border-violet-500/30">Emma Watson (CS-2026)</span>
+          </h2>
+          <p class="text-xs text-slate-400">Track your weekly lecture timetable and monitor your attendance percentage.</p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-700">
+          <span class="text-xs text-slate-400">Institutional Minimum:</span>
+          <span class="text-xs font-bold text-amber-400">75% Attendance Required</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Attendance Status Summary Card (1 col) -->
+        <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 shadow-md flex flex-col justify-between">
+          <div>
+            <h3 class="font-semibold text-sm text-white">My Attendance Score</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Calculated across all class sessions</p>
+
+            <div class="my-6 text-center">
+              <div id="student-score-circle" class="inline-flex items-center justify-center w-28 h-28 rounded-full border-4 border-amber-500/60 bg-amber-500/10">
+                <span id="student-percentage-display" class="text-2xl font-black text-amber-300">66.7%</span>
+              </div>
+              <div id="student-attendance-status-badge" class="mt-3 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Needs Improvement (<75%)
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4">
+              <div class="bg-slate-900/50 p-2.5 rounded-lg">
+                <div class="text-[11px] text-slate-400">Total Classes</div>
+                <div id="student-total-classes" class="text-lg font-bold text-white">3</div>
+              </div>
+              <div class="bg-slate-900/50 p-2.5 rounded-lg">
+                <div class="text-[11px] text-slate-400">Classes Attended</div>
+                <div id="student-attended-classes" class="text-lg font-bold text-emerald-400">2</div>
+              </div>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-4 bg-slate-900/40 p-2.5 rounded-lg border border-slate-700/50">
+            * Attendance below 75% will disqualify candidate from semester finals without official medical waiver.
+          </div>
+        </div>
+
+        <!-- Student Timetable (2 cols) -->
+        <div class="lg:col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+          <div class="p-4 border-b border-slate-700 bg-slate-800/90 flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold text-sm text-white">My Weekly Class Timetable</h3>
+              <p class="text-xs text-slate-400">Upcoming classes, venues, and lecture times</p>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+                <tr>
+                  <th class="p-3.5">Course Code</th>
+                  <th class="p-3.5">Subject</th>
+                  <th class="p-3.5">Faculty</th>
+                  <th class="p-3.5">Day</th>
+                  <th class="p-3.5">Timing</th>
+                  <th class="p-3.5">Room</th>
+                </tr>
+              </thead>
+              <tbody id="table-student-schedule" class="divide-y divide-slate-700/60 text-slate-300">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Attendance History Table -->
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+        <div class="p-4 border-b border-slate-700 bg-slate-800/90">
+          <h3 class="font-semibold text-sm text-white">My Attendance Log</h3>
+          <p class="text-xs text-slate-400">Detailed records of session presence and absences</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/60 text-slate-400 uppercase font-semibold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="p-3.5">Course</th>
+                <th class="p-3.5">Date</th>
+                <th class="p-3.5">Status</th>
+                <th class="p-3.5">Remark</th>
+              </tr>
+            </thead>
+            <tbody id="table-student-attendance-log" class="divide-y divide-slate-700/60 text-slate-300">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- COMMON SECTION: ACADEMIC ACTIVITIES & EVENTS CALENDAR -->
+    <!-- ============================================================= -->
+    <section class="bg-slate-800/80 border border-slate-700 rounded-xl overflow-hidden shadow-md">
+      <div class="p-4 border-b border-slate-700 bg-slate-800/90 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="font-semibold text-sm text-white flex items-center gap-2">
+            <span>Institutional Academic Activities & Events</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Campus Calendar</span>
+          </h3>
+          <p class="text-xs text-slate-400">Symposiums, midterms, workshops, and department meetings</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4" id="calendar-activities-cards">
+        <!-- Dynamically rendered -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================= -->
+  <!-- MODAL 1: ADD CLASS SCHEDULE (ADMIN) -->
+  <!-- ============================================================= -->
+  <div id="modal-add-schedule" class="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-white text-base">Schedule New Class</h3>
+        <button onclick="closeModal('modal-add-schedule')" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <form id="form-add-schedule" onsubmit="handleAddSchedule(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Course Code</label>
+          <input type="text" id="sched-code" required placeholder="e.g., CS201" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Course Title</label>
+          <input type="text" id="sched-name" required placeholder="e.g., Computer Networks" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Faculty Member</label>
+          <select id="sched-faculty" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+            <option value="prof_smith">Prof. Alice Smith (prof_smith)</option>
+            <option value="prof_john">Prof. John Miller (prof_john)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">Day of Week</label>
+            <select id="sched-day" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">Classroom / Lab</label>
+            <input type="text" id="sched-room" required placeholder="e.g., Lab-302" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Time Interval</label>
+          <input type="text" id="sched-time" required placeholder="e.g., 01:00 PM - 02:30 PM" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-700">
+          <button type="button" onclick="closeModal('modal-add-schedule')" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium">Save Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL 2: LOG WORKING HOURS (FACULTY) -->
+  <!-- ============================================================= -->
+  <div id="modal-log-hours" class="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-white text-base">Log Working Hours</h3>
+        <button onclick="closeModal('modal-log-hours')" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <form id="form-log-hours" onsubmit="handleLogHours(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Date</label>
+          <input type="date" id="work-date" required value="2026-10-09" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Duration (Hours)</label>
+          <input type="number" step="0.5" min="0.5" max="12" id="work-hours" required placeholder="e.g., 3.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Activity Category</label>
+          <select id="work-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500">
+            <option value="Lecture Delivery">Lecture Delivery</option>
+            <option value="Lab Practical Supervision">Lab Practical Supervision</option>
+            <option value="Curriculum & Exam Grading">Curriculum & Exam Grading</option>
+            <option value="Research & Department Meeting">Research & Department Meeting</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Task Notes / Description</label>
+          <input type="text" id="work-desc" required placeholder="e.g., Data structures binary tree lab session" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-700">
+          <button type="button" onclick="closeModal('modal-log-hours')" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Log Hours</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL 3: MARK STUDENT ATTENDANCE (FACULTY) -->
+  <!-- ============================================================= -->
+  <div id="modal-mark-attendance" class="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-white text-base">Record Student Attendance</h3>
+        <button onclick="closeModal('modal-mark-attendance')" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <form id="form-mark-attendance" onsubmit="handleMarkAttendance(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Course</label>
+          <select id="att-course" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+            <option value="CS101">CS101 - Data Structures</option>
+            <option value="CS102">CS102 - Operating Systems</option>
+            <option value="CS103">CS103 - Database Systems</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Student</label>
+          <select id="att-student" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+            <option value="stu_emma">Emma Watson (stu_emma)</option>
+            <option value="stu_david">David Clark (stu_david)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Date</label>
+          <input type="date" id="att-date" required value="2026-10-09" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Attendance Status</label>
+          <div class="flex gap-4 items-center bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+            <label class="flex items-center gap-2 cursor-pointer text-emerald-400 font-medium">
+              <input type="radio" name="att-status" value="PRESENT" checked class="text-emerald-500">
+              Present
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-rose-400 font-medium">
+              <input type="radio" name="att-status" value="ABSENT" class="text-rose-500">
+              Absent
+            </label>
+          </div>
+        </div>
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-700">
+          <button type="button" onclick="closeModal('modal-mark-attendance')" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL 4: SCHEDULE ACADEMIC ACTIVITY (ADMIN) -->
+  <!-- ============================================================= -->
+  <div id="modal-add-activity" class="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-white text-base">Schedule Academic Activity</h3>
+        <button onclick="closeModal('modal-add-activity')" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <form id="form-add-activity" onsubmit="handleAddActivity(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Event Title</label>
+          <input type="text" id="act-title" required placeholder="e.g., AI Research Workshop" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">Date</label>
+            <input type="date" id="act-date" required value="2026-10-25" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-medium">Time Slot</label>
+            <input type="text" id="act-time" required placeholder="e.g., 02:00 PM - 05:00 PM" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-purple-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Venue Location</label>
+          <input type="text" id="act-venue" required placeholder="e.g., Main Auditorium" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1 font-medium">Organizing Body / Department</label>
+          <input type="text" id="act-organizer" required placeholder="e.g., Department of Computer Science" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-700">
+          <button type="button" onclick="closeModal('modal-add-activity')" class="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-medium">Publish Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800/60 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-400 mt-auto">
+    EduTime Academic Management System &bull; Java Backend Compatible &bull; Role-Based Security: Admin, Faculty, Student
+  </footer>
+
+  <!-- Embedded Application Logic -->
+  <script>
+    // System Data Stores
+    const defaultData = {
+      currentRole: 'ADMIN',
+      schedules: [
+        { id: 1, courseCode: 'CS101', courseName: 'Data Structures', facultyUsername: 'prof_smith', facultyName: 'Prof. Alice Smith', dayOfWeek: 'Monday', timeSlot: '09:00 AM - 10:30 AM', roomNumber: 'Lab-201' },
+        { id: 2, courseCode: 'CS102', courseName: 'Operating Systems', facultyUsername: 'prof_john', facultyName: 'Prof. John Miller', dayOfWeek: 'Monday', timeSlot: '11:00 AM - 12:30 PM', roomNumber: 'Hall-104' },
+        { id: 3, courseCode: 'CS101', courseName: 'Data Structures', facultyUsername: 'prof_smith', facultyName: 'Prof. Alice Smith', dayOfWeek: 'Wednesday', timeSlot: '09:00 AM - 10:30 AM', roomNumber: 'Lab-201' },
+        { id: 4, courseCode: 'CS103', courseName: 'Database Systems', facultyUsername: 'prof_smith', facultyName: 'Prof. Alice Smith', dayOfWeek: 'Thursday', timeSlot: '02:00 PM - 03:30 PM', roomNumber: 'Room-305' }
+      ],
+      workLogs: [
+        { id: 1, facultyUsername: 'prof_smith', facultyName: 'Prof. Alice Smith', date: '2026-10-06', hours: 3.0, activity: 'Lectures and Lab Supervision' },
+        { id: 2, facultyUsername: 'prof_smith', facultyName: 'Prof. Alice Smith', date: '2026-10-07', hours: 2.5, activity: 'Curriculum Planning and Office Hours' },
+        { id: 3, facultyUsername: 'prof_john', facultyName: 'Prof. John Miller', date: '2026-10-06', hours: 4.0, activity: 'OS Lab and Assignment Grading' }
+      ],
+      attendances: [
+        { id: 1, studentUsername: 'stu_emma', studentName: 'Emma Watson', courseCode: 'CS101', date: '2026-10-05', isPresent: true },
+        { id: 2, studentUsername: 'stu_emma', studentName: 'Emma Watson', courseCode: 'CS101', date: '2026-10-07', isPresent: true },
+        { id: 3, studentUsername: 'stu_emma', studentName: 'Emma Watson', courseCode: 'CS102', date: '2026-10-05', isPresent: false },
+        { id: 4, studentUsername: 'stu_david', studentName: 'David Clark', courseCode: 'CS101', date: '2026-10-05', isPresent: true },
+        { id: 5, studentUsername: 'stu_david', studentName: 'David Clark', courseCode: 'CS101', date: '2026-10-07', isPresent: false }
+      ],
+      activities: [
+        { id: 1, title: 'Annual Tech Symposium', date: '2026-10-15', time: '10:00 AM - 04:00 PM', venue: 'Auditorium', organizer: 'Computer Science Dept' },
+        { id: 2, title: 'Mid-Semester Examinations', date: '2026-10-20', time: '09:00 AM - 01:00 PM', venue: 'Examination Halls', organizer: 'Academic Controller' }
+      ]
+    };
+
+    // Load or initialize state
+    let state = JSON.parse(localStorage.getItem('eduTimeState')) || defaultData;
+
+    function saveState() {
+      localStorage.setItem('eduTimeState', JSON.stringify(state));
+      updateKPIs();
+      renderAllViews();
+    }
+
+    // Role switching
+    function setRole(role) {
+      state.currentRole = role;
+      
+      const adminBtn = document.getElementById('btn-role-admin');
+      const facBtn = document.getElementById('btn-role-faculty');
+      const stuBtn = document.getElementById('btn-role-student');
+
+      const activeClass = 'bg-indigo-600 text-white shadow-sm';
+      const inactiveClass = 'text-slate-300 hover:text-white hover:bg-slate-800';
+
+      [adminBtn, facBtn, stuBtn].forEach(b => {
+        b.className = b.className.replace(activeClass, '').replace(inactiveClass, '') + ' ' + inactiveClass;
+      });
+
+      const profileName = document.getElementById('profile-name');
+      const profileRole = document.getElementById('profile-role');
+      const profileAvatar = document.getElementById('profile-avatar');
+
+      document.getElementById('view-admin').classList.add('hidden');
+      document.getElementById('view-faculty').classList.add('hidden');
+      document.getElementById('view-student').classList.add('hidden');
+
+      if (role === 'ADMIN') {
+        adminBtn.className = adminBtn.className.replace(inactiveClass, '') + ' ' + activeClass;
+        profileName.innerText = 'Dr. Robert Vance';
+        profileRole.innerText = 'ROLE: ADMIN';
+        profileAvatar.innerText = 'RV';
+        document.getElementById('view-admin').classList.remove('hidden');
+        showToast('Switched to Administrator Portal', 'success');
+      } else if (role === 'FACULTY') {
+        facBtn.className = facBtn.className.replace(inactiveClass, '') + ' ' + activeClass;
+        profileName.innerText = 'Prof. Alice Smith';
+        profileRole.innerText = 'ROLE: FACULTY';
+        profileAvatar.innerText = 'AS';
+        document.getElementById('view-faculty').classList.remove('hidden');
+        showToast('Switched to Faculty Portal (Prof. Alice Smith)', 'success');
+      } else if (role === 'STUDENT') {
+        stuBtn.className = stuBtn.className.replace(inactiveClass, '') + ' ' + activeClass;
+        profileName.innerText = 'Emma Watson';
+        profileRole.innerText = 'ROLE: STUDENT';
+        profileAvatar.innerText = 'EW';
+        document.getElementById('view-student').classList.remove('hidden');
+        showToast('Switched to Student Portal (Emma Watson)', 'success');
+      }
+
+      renderAllViews();
+    }
+
+    // Modal Handlers
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function showToast(msg, type = 'success') {
+      const bar = document.getElementById('notification-bar');
+      const content = document.getElementById('notification-content');
+      bar.classList.remove('hidden');
+      
+      if (type === 'success') {
+        content.className = 'p-3 rounded-lg text-xs font-medium flex items-center justify-between bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+      } else {
+        content.className = 'p-3 rounded-lg text-xs font-medium flex items-center justify-between bg-rose-500/15 text-rose-300 border border-rose-500/30';
+      }
+      content.innerHTML = `<span>${msg}</span><button onclick="document.getElementById('notification-bar').classList.add('hidden')" class="hover:text-white font-bold ml-2">✕</button>`;
+
+      setTimeout(() => {
+        bar.classList.add('hidden');
+      }, 4000);
+    }
+
+    // Calculations & KPI Updates
+    function updateKPIs() {
+      // Unique courses count
+      const uniqueCourses = new Set(state.schedules.map(s => s.courseCode)).size;
+      document.getElementById('kpi-courses-count').innerText = uniqueCourses;
+
+      // Total logged hours
+      const totalHours = state.workLogs.reduce((sum, item) => sum + parseFloat(item.hours || 0), 0);
+      document.getElementById('kpi-hours-count').innerText = `${totalHours.toFixed(1)} hrs`;
+
+      // Overall institution attendance %
+      const totalAtt = state.attendances.length;
+      const presentAtt = state.attendances.filter(a => a.isPresent).length;
+      const avgPercent = totalAtt > 0 ? ((presentAtt / totalAtt) * 100).toFixed(1) : '100.0';
+      document.getElementById('kpi-attendance-avg').innerText = `${avgPercent}%`;
+
+      // Upcoming activities count
+      document.getElementById('kpi-activities-count').innerText = state.activities.length;
+    }
+
+    // Render Views
+    function renderAllViews() {
+      renderTimetable();
+      renderAdminFacultyHours();
+      renderAdminAttendance();
+      renderFacultyDashboard();
+      renderStudentDashboard();
+      renderAcademicCalendar();
+    }
+
+    // Admin Timetable Render
+    function renderTimetable() {
+      const tbody = document.getElementById('table-admin-schedules');
+      const filterDay = document.getElementById('filter-timetable-day').value;
+      const filtered = filterDay === 'ALL' ? state.schedules : state.schedules.filter(s => s.dayOfWeek === filterDay);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">No class schedules found for the selected filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(s => `
+        <tr class="hover:bg-slate-700/30 transition-colors">
+          <td class="p-3.5 font-bold text-white">${s.courseCode} <span class="block text-[11px] font-normal text-slate-400">${s.courseName}</span></td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-medium">${s.facultyName || s.facultyUsername}</span></td>
+          <td class="p-3.5 font-medium text-slate-200">${s.dayOfWeek}</td>
+          <td class="p-3.5 font-mono text-slate-300">${s.timeSlot}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">${s.roomNumber}</span></td>
+          <td class="p-3.5 text-right">
+            <button onclick="deleteSchedule(${s.id})" class="text-rose-400 hover:text-rose-300 p-1 rounded hover:bg-rose-500/10" title="Delete Schedule">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function deleteSchedule(id) {
+      if (confirm('Delete this class schedule?')) {
+        state.schedules = state.schedules.filter(s => s.id !== id);
+        saveState();
+        showToast('Schedule removed successfully');
+      }
+    }
+
+    // Admin Faculty Hours Render
+    function renderAdminFacultyHours() {
+      const tbody = document.getElementById('table-admin-faculty-hours');
+      tbody.innerHTML = state.workLogs.map(w => `
+        <tr class="hover:bg-slate-700/30 transition-colors">
+          <td class="p-3.5 font-semibold text-white">${w.facultyName || w.facultyUsername}</td>
+          <td class="p-3.5 font-mono text-slate-400">${w.date}</td>
+          <td class="p-3.5 font-bold text-emerald-400">${parseFloat(w.hours).toFixed(1)} hrs</td>
+          <td class="p-3.5 text-slate-300">${w.activity}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-semibold border border-emerald-500/20">LOGGED</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // Admin Attendance Registry
+    function renderAdminAttendance() {
+      const tbody = document.getElementById('table-admin-attendance');
+      tbody.innerHTML = state.attendances.map(a => `
+        <tr class="hover:bg-slate-700/30 transition-colors">
+          <td class="p-3.5 font-semibold text-white">${a.studentName || a.studentUsername}</td>
+          <td class="p-3.5 font-mono text-indigo-300">${a.courseCode}</td>
+          <td class="p-3.5 text-slate-400 font-mono">${a.date}</td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold ${a.isPresent ? 'badge-present' : 'badge-absent'}">
+              ${a.isPresent ? 'PRESENT' : 'ABSENT'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Faculty Dashboard Render
+    function renderFacultyDashboard() {
+      const myUsername = 'prof_smith';
+      const mySchedule = state.schedules.filter(s => s.facultyUsername === myUsername);
+      const schedTbody = document.getElementById('table-faculty-schedule');
+
+      if (mySchedule.length === 0) {
+        schedTbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">No scheduled classes assigned to you.</td></tr>`;
+      } else {
+        schedTbody.innerHTML = mySchedule.map(s => `
+          <tr class="hover:bg-slate-700/30 transition-colors">
+            <td class="p-3.5 font-bold text-indigo-300">${s.courseCode}</td>
+            <td class="p-3.5 text-slate-200">${s.courseName}</td>
+            <td class="p-3.5 font-medium text-slate-300">${s.dayOfWeek}</td>
+            <td class="p-3.5 font-mono text-slate-300">${s.timeSlot}</td>
+            <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-slate-700 text-slate-200 border border-slate-600">${s.roomNumber}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // Faculty Hours Calculation
+      const myLogs = state.workLogs.filter(w => w.facultyUsername === myUsername);
+      const totalHours = myLogs.reduce((acc, curr) => acc + parseFloat(curr.hours || 0), 0);
+      document.getElementById('faculty-total-hours').innerText = totalHours.toFixed(1);
+      const percentTarget = Math.min((totalHours / 20.0) * 100, 100);
+      document.getElementById('faculty-hours-bar').style.width = `${percentTarget}%`;
+
+      // Recent tasks
+      const recentTasksBox = document.getElementById('faculty-recent-tasks');
+      recentTasksBox.innerHTML = myLogs.slice(-3).reverse().map(l => `
+        <div class="flex justify-between items-center bg-slate-900/40 p-2 rounded border border-slate-700/40">
+          <span class="truncate max-w-[160px] text-slate-300">${l.activity}</span>
+          <span class="font-bold text-emerald-400 font-mono">${parseFloat(l.hours).toFixed(1)}h</span>
+        </div>
+      `).join('');
+
+      // Faculty Courses Attendance
+      const myCourseCodes = mySchedule.map(s => s.courseCode);
+      const relevantAtt = state.attendances.filter(a => myCourseCodes.includes(a.courseCode));
+      const attTbody = document.getElementById('table-faculty-attendances');
+
+      if (relevantAtt.length === 0) {
+        attTbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No student attendance marked yet for your assigned courses.</td></tr>`;
+      } else {
+        attTbody.innerHTML = relevantAtt.map(a => `
+          <tr class="hover:bg-slate-700/30 transition-colors">
+            <td class="p-3.5 font-semibold text-white">${a.studentName || a.studentUsername}</td>
+            <td class="p-3.5 font-mono text-indigo-300">${a.courseCode}</td>
+            <td class="p-3.5 text-slate-400 font-mono">${a.date}</td>
+            <td class="p-3.5">
+              <span class="px-2.5 py-0.5 rounded text-[11px] font-bold ${a.isPresent ? 'badge-present' : 'badge-absent'}">
+                ${a.isPresent ? 'PRESENT' : 'ABSENT'}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Student Dashboard Render
+    function renderStudentDashboard() {
+      const studentUsername = 'stu_emma';
+      const schedTbody = document.getElementById('table-student-schedule');
+      schedTbody.innerHTML = state.schedules.map(s => `
+        <tr class="hover:bg-slate-700/30 transition-colors">
+          <td class="p-3.5 font-bold text-indigo-300">${s.courseCode}</td>
+          <td class="p-3.5 text-slate-200">${s.courseName}</td>
+          <td class="p-3.5 text-slate-400">${s.facultyName || s.facultyUsername}</td>
+          <td class="p-3.5 font-medium text-slate-300">${s.dayOfWeek}</td>
+          <td class="p-3.5 font-mono text-slate-300">${s.timeSlot}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-slate-700 text-slate-200">${s.roomNumber}</span></td>
+        </tr>
+      `).join('');
+
+      // Student Attendance Score
+      const myRecords = state.attendances.filter(a => a.studentUsername === studentUsername);
+      const total = myRecords.length;
+      const present = myRecords.filter(a => a.isPresent).length;
+      const percentage = total > 0 ? (present / total) * 100 : 100;
+
+      document.getElementById('student-total-classes').innerText = total;
+      document.getElementById('student-attended-classes').innerText = present;
+      document.getElementById('student-percentage-display').innerText = `${percentage.toFixed(1)}%`;
+
+      const circle = document.getElementById('student-score-circle');
+      const badge = document.getElementById('student-attendance-status-badge');
+
+      if (percentage >= 75) {
+        circle.className = 'inline-flex items-center justify-center w-28 h-28 rounded-full border-4 border-emerald-500/60 bg-emerald-500/10';
+        document.getElementById('student-percentage-display').className = 'text-2xl font-black text-emerald-300';
+        badge.className = 'mt-3 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        badge.innerText = 'Good Standing (≥75%)';
+      } else {
+        circle.className = 'inline-flex items-center justify-center w-28 h-28 rounded-full border-4 border-amber-500/60 bg-amber-500/10';
+        document.getElementById('student-percentage-display').className = 'text-2xl font-black text-amber-300';
+        badge.className = 'mt-3 inline-block px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        badge.innerText = 'Attendance Low (<75%)';
+      }
+
+      // Log table
+      const logTbody = document.getElementById('table-student-attendance-log');
+      logTbody.innerHTML = myRecords.map(r => `
+        <tr class="hover:bg-slate-700/30 transition-colors">
+          <td class="p-3.5 font-bold text-white">${r.courseCode}</td>
+          <td class="p-3.5 font-mono text-slate-400">${r.date}</td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold ${r.isPresent ? 'badge-present' : 'badge-absent'}">
+              ${r.isPresent ? 'PRESENT' : 'ABSENT'}
+            </span>
+          </td>
+          <td class="p-3.5 text-slate-400">${r.isPresent ? 'Attended on time' : 'Unexcused absence'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Academic Calendar Render
+    function renderAcademicCalendar() {
+      const container = document.getElementById('calendar-activities-cards');
+      container.innerHTML = state.activities.map(act => `
+        <div class="bg-slate-900/70 border border-slate-700/70 p-4 rounded-xl flex items-start gap-3.5 hover:border-purple-500/50 transition-all">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex flex-col items-center justify-center text-purple-300 shrink-0">
+            <span class="text-[10px] font-bold uppercase tracking-wider">${new Date(act.date).toLocaleString('default', { month: 'short' })}</span>
+            <span class="text-base font-extrabold leading-none">${new Date(act.date).getDate()}</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="font-bold text-white text-sm">${act.title}</h4>
+              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono border border-slate-700">${act.time}</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-300 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>Venue: <strong>${act.venue}</strong></span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1">
+              Organized by: <span class="text-slate-300">${act.organizer}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Form Event Handlers
+    function handleAddSchedule(e) {
+      e.preventDefault();
+      const code = document.getElementById('sched-code').value.trim();
+      const name = document.getElementById('sched-name').value.trim();
+      const facUser = document.getElementById('sched-faculty').value;
+      const day = document.getElementById('sched-day').value;
+      const time = document.getElementById('sched-time').value.trim();
+      const room = document.getElementById('sched-room').value.trim();
+
+      const facName = facUser === 'prof_smith' ? 'Prof. Alice Smith' : 'Prof. John Miller';
+
+      state.schedules.push({
+        id: Date.now(),
+        courseCode: code,
+        courseName: name,
+        facultyUsername: facUser,
+        facultyName: facName,
+        dayOfWeek: day,
+        timeSlot: time,
+        roomNumber: room
+      });
+
+      saveState();
+      closeModal('modal-add-schedule');
+      document.getElementById('form-add-schedule').reset();
+      showToast(`Class schedule ${code} added successfully!`, 'success');
+    }
+
+    function handleLogHours(e) {
+      e.preventDefault();
+      const date = document.getElementById('work-date').value;
+      const hours = parseFloat(document.getElementById('work-hours').value);
+      const category = document.getElementById('work-type').value;
+      const desc = document.getElementById('work-desc').value.trim();
+
+      state.workLogs.push({
+        id: Date.now(),
+        facultyUsername: 'prof_smith',
+        facultyName: 'Prof. Alice Smith',
+        date: date,
+        hours: hours,
+        activity: `${category} - ${desc}`
+      });
+
+      saveState();
+      closeModal('modal-log-hours');
+      document.getElementById('form-log-hours').reset();
+      showToast(`Logged ${hours} hours successfully!`, 'success');
+    }
+
+    function handleMarkAttendance(e) {
+      e.preventDefault();
+      const course = document.getElementById('att-course').value;
+      const student = document.getElementById('att-student').value;
+      const date = document.getElementById('att-date').value;
+      const isPresent = document.querySelector('input[name="att-status"]:checked').value === 'PRESENT';
+
+      const studentName = student === 'stu_emma' ? 'Emma Watson' : 'David Clark';
+
+      state.attendances.push({
+        id: Date.now(),
+        studentUsername: student,
+        studentName: studentName,
+        courseCode: course,
+        date: date,
+        isPresent: isPresent
+      });
+
+      saveState();
+      closeModal('modal-mark-attendance');
+      document.getElementById('form-mark-attendance').reset();
+      showToast(`Attendance marked as ${isPresent ? 'PRESENT' : 'ABSENT'} for ${studentName}!`, 'success');
+    }
+
+    function handleAddActivity(e) {
+      e.preventDefault();
+      const title = document.getElementById('act-title').value.trim();
+      const date = document.getElementById('act-date').value;
+      const time = document.getElementById('act-time').value.trim();
+      const venue = document.getElementById('act-venue').value.trim();
+      const organizer = document.getElementById('act-organizer').value.trim();
+
+      state.activities.push({
+        id: Date.now(),
+        title: title,
+        date: date,
+        time: time,
+        venue: venue,
+        organizer: organizer
+      });
+
+      saveState();
+      closeModal('modal-add-activity');
+      document.getElementById('form-add-activity').reset();
+      showToast(`Academic event '${title}' scheduled!`, 'success');
+    }
+
+    // Initialize application on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateKPIs();
+      setRole('ADMIN');
+    });
+  </script>
+</body>
+</html>
